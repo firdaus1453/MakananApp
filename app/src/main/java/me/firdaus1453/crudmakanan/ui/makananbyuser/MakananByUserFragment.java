@@ -51,6 +51,13 @@ public class MakananByUserFragment extends Fragment implements MakananByUserCont
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Merequest data makanan by user
+        mMakananByUserPresenter.getListFoodByUser(idUser);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment

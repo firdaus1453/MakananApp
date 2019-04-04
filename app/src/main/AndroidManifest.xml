@@ -29,7 +29,9 @@
         </activity>
         <activity android:name=".ui.register.RegisterActivity" />
         <activity android:name=".ui.uploadmakanan.UploadMakananActivity" />
-        <activity android:name=".ui.detailmakanan.DetailMakananActivity" />
+        <activity android:name=".ui.detailmakanan.DetailMakananActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".ui.main.MainActivity"/>
         <activity android:name=".ui.makananbycategory.MakananByCategoryActivity" />
     </application>
 

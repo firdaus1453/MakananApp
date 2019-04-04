@@ -1,8 +1,10 @@
 package me.firdaus1453.crudmakanan.ui.detailmakanan;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -17,7 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.widget.NestedScrollView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import me.firdaus1453.crudmakanan.R;
@@ -40,12 +43,12 @@ public class DetailMakananActivity extends AppCompatActivity implements DetailMa
     TextView txtTimeMakananDetail;
     @BindView(R.id.txt_name_user)
     TextView txtNameUser;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     @BindView(R.id.txt_desc_makanan)
-    TextView txtDescMakanan;
-    @BindView(R.id.card_view_detail)
-    CardView cardViewDetail;
+    WebView txtDescMakanan;
     @BindView(R.id.sv_detail)
-    ScrollView svDetail;
+    NestedScrollView svDetail;
 
     private DetailMakananPresenter mDetailMakananPresenter = new DetailMakananPresenter(this);
 
@@ -55,7 +58,10 @@ public class DetailMakananActivity extends AppCompatActivity implements DetailMa
         setContentView(R.layout.activity_detail_makanan);
         ButterKnife.bind(this);
 
-        getSupportActionBar().setTitle("Detail makanan");
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("");
         String idMakanan = getIntent().getStringExtra(Constants.KEY_EXTRA_ID_MAKANAN);
         mDetailMakananPresenter.getDetailMakanan(idMakanan);
     }
@@ -73,15 +79,24 @@ public class DetailMakananActivity extends AppCompatActivity implements DetailMa
         svDetail.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void showDetailMakanan(MakananData makananData) {
+
+//        getSupportActionBar().setTitle(makananData.getNamaMakanan());
+
         RequestOptions options = new RequestOptions().error(R.drawable.ic_broken_image).placeholder(R.drawable.ic_broken_image);
         Glide.with(this).load(makananData.getUrlMakanan()).apply(options).into(imgMakananDetail);
 
         txtNameMakananDetail.setText(makananData.getNamaMakanan());
-        txtDescMakanan.setText(makananData.getDescMakanan());
-        txtNameUser.setText(makananData.getNamaUser());
+        String name = "Oleh : " + makananData.getNamaUser();
+        txtNameUser.setText(name);
         txtTimeMakananDetail.setText(newDate(makananData.getInsertTime()));
+
+        // set isi berita sebagai html ke webview
+        txtDescMakanan.getSettings().setJavaScriptEnabled(true);
+        txtDescMakanan.loadData(makananData.getDescMakanan(), "text/html; charset=utf-8", "UTF-8");
+
     }
 
     @Override

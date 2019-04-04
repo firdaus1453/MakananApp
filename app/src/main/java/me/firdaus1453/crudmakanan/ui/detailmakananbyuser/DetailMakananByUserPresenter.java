@@ -57,7 +57,7 @@ public class DetailMakananByUserPresenter implements DetailMakananByUserContract
     public void getDetailMakanan(String idMakanan) {
         view.showProgress();
 
-        if (idMakanan.isEmpty()){
+        if (idMakanan.isEmpty()) {
             view.showMessage("ID Makanan tidak ada");
             view.hideProgress();
             return;
@@ -68,13 +68,13 @@ public class DetailMakananByUserPresenter implements DetailMakananByUserContract
             @Override
             public void onResponse(Call<DetailMakananResponse> call, Response<DetailMakananResponse> response) {
                 view.hideProgress();
-                if (response.body() != null){
-                    if (response.body().getResult() == 1){
+                if (response.body() != null) {
+                    if (response.body().getResult() == 1) {
                         view.showDetailMakanan(response.body().getMakananData());
-                    }else {
+                    } else {
                         view.showMessage(response.body().getMessage());
                     }
-                }else {
+                } else {
                     view.showMessage("Data kosong");
                 }
             }
@@ -94,6 +94,40 @@ public class DetailMakananByUserPresenter implements DetailMakananByUserContract
 
     @Override
     public void deleteMakanan(String idMakanan, String namaFotoMakanan) {
+        view.showProgress();
+
+        if (idMakanan.isEmpty()) {
+            view.showMessage("ID makanan tidak ada");
+            return;
+        }
+        if (namaFotoMakanan.isEmpty()) {
+            view.showMessage("Nama foto makanan tidak ada");
+            return;
+        }
+
+        Call<MakananResponse> call = mApiInterface.deleteMakanan(Integer.valueOf(idMakanan), namaFotoMakanan);
+        call.enqueue(new Callback<MakananResponse>() {
+            @Override
+            public void onResponse(Call<MakananResponse> call, Response<MakananResponse> response) {
+                view.hideProgress();
+                if (response.body() != null){
+                    if (response.body().getResult() == 1){
+                        view.showMessage(response.body().getMessage());
+                        view.successDelete();
+                    }else {
+                        view.showMessage(response.body().getMessage());
+                    }
+                }else {
+                    view.showMessage("Data kosong");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MakananResponse> call, Throwable t) {
+                view.hideProgress();
+                view.showMessage(t.getMessage());
+            }
+        });
 
     }
 }

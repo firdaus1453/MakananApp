@@ -12,7 +12,7 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="16dp"
         android:tint="@android:color/white"
-        app:backgroundTint="@color/colorPrimaryDark"
+        app:backgroundTint="@color/colorPrimary"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 
@@ -34,8 +34,9 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Makanan Terbaru"
+                    android:text="@string/makanan_terbaru"
                     android:textSize="25sp"
+                    android:fontFamily="sans-serif-condensed-medium"
                     android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -48,7 +49,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Makanan Populer"
+                    android:fontFamily="sans-serif-condensed-medium"
+                    android:text="@string/makanan_populer"
                     android:textSize="25sp"
                     android:textStyle="bold" />
 
@@ -62,7 +64,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Kategori"
+                    android:fontFamily="sans-serif-condensed-medium"
+                    android:text="@string/kategori"
                     android:textSize="25sp"
                     android:textStyle="bold" />
 

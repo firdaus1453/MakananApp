@@ -59,6 +59,7 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
     private Uri filePath;
     private String idCategory, idMakanan;
     private MakananData mMakananData;
+    private String namaFotoMakanan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +72,6 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
 
         // Menangkap id makanan yang dikirimkan dari activity sebelumnya
         idMakanan = getIntent().getStringExtra(Constants.KEY_EXTRA_ID_MAKANAN);
-
-        // Mengambil data detail makanan
-        mDetailMakananByUserPresenter.getDetailMakanan(idMakanan);
 
         // Mengambil data category untuk ditampilkan di spinner
         mDetailMakananByUserPresenter.getCategory();
@@ -127,6 +125,9 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
         // Mengambil id category
         idCategory = makananData.getIdKategori();
 
+        // Mengambil nama foto makanan
+        namaFotoMakanan = makananData.getFotoMakanan();
+
         // Menampilkan semua data ke layar
         edtName.setText(makananData.getNamaMakanan());
         edtDesc.setText(makananData.getDescMakanan());
@@ -136,7 +137,6 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
         // Menampilkan gambar makanan
         RequestOptions options = new RequestOptions().error(R.drawable.ic_broken_image).placeholder(R.drawable.ic_broken_image);
         Glide.with(this).load(makananData.getUrlMakanan()).apply(options).into(imgPicture);
-
     }
 
     @Override
@@ -153,6 +153,7 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
     public void showSpinnerCategory(List<MakananData> categoryDataList) {
         // Membuat data penampung untuk spinner
         List<String> listSpinner = new ArrayList<>();
+        listSpinner.clear();
         for (int i = 0; i < categoryDataList.size(); i++){
             listSpinner.add(categoryDataList.get(i).getNamaKategori());
         }
@@ -176,6 +177,11 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
 
             }
         });
+
+
+        // Mengambil data detail makanan
+        mDetailMakananByUserPresenter.getDetailMakanan(idMakanan);
+
     }
 
     @OnClick({R.id.fab_choose_picture, R.id.btn_update, R.id.btn_delete})
@@ -186,7 +192,20 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
             case R.id.btn_update:
                 break;
             case R.id.btn_delete:
+                mDetailMakananByUserPresenter.deleteMakanan(idMakanan, namaFotoMakanan);
                 break;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Mengambil data category untuk ditampilkan di spinner
+        mDetailMakananByUserPresenter.getCategory();
+        // Mengambil data detail makanan
+        mDetailMakananByUserPresenter.getDetailMakanan(idMakanan);
+
+
+
     }
 }

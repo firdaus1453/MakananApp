@@ -74,7 +74,7 @@ public interface ApiInterface {
             @Part("descmakanan") RequestBody descmakanan,
             @Part("timeinsert") RequestBody timeinsert,
             @Part MultipartBody.Part image
-            );
+    );
 
     // Mengambil data detail makanan
     @GET("getdetailmakanan.php")
@@ -87,4 +87,11 @@ public interface ApiInterface {
     // Mengambil data makanan berdasarkan id user
     @GET("getmakananbyuser.php")
     Call<MakananResponse> getMakananByUser(@Query("iduser") int idUser);
+
+    @FormUrlEncoded
+    @POST("deletemakanan.php")
+    Call<MakananResponse> deleteMakanan(
+            @Field("idmakanan") int idMakanan,
+            @Field("fotomakanan") String namaFotoMakanan
+    );
 }

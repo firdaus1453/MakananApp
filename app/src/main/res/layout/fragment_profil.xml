@@ -20,7 +20,7 @@
                 android:id="@+id/picture"
                 android:layout_width="140dp"
                 android:layout_height="140dp"
-                android:src="@mipmap/ic_launcher_round" />
+                android:src="@drawable/mozilla" />
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabChoosePic"
                 android:layout_width="wrap_content"

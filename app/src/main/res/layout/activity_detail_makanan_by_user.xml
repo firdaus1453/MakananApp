@@ -86,8 +86,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif-light"
-                            android:hint="Deskripsi makanan"
-                            android:inputType="textPersonName|textCapWords" />
+                            android:gravity="left|top"
+                            android:lines="5"
+                            android:hint="Deskripsi makanan" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView

@@ -1,9 +1,13 @@
 package me.firdaus1453.crudmakanan.ui.detailmakananbyuser;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,9 +21,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
@@ -56,10 +63,11 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
     SwipeRefreshLayout swipeRefresh;
 
     private DetailMakananByUserPresenter mDetailMakananByUserPresenter = new DetailMakananByUserPresenter(this);
-    private Uri filePath;
+    private Uri filePath = null;
     private String idCategory, idMakanan;
     private MakananData mMakananData;
     private String namaFotoMakanan;
+    private String[] mIdCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +89,6 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
             @Override
             public void onRefresh() {
                 swipeRefresh.setRefreshing(false);
-                // Mengambil data detail makanan
-                mDetailMakananByUserPresenter.getDetailMakanan(idMakanan);
 
                 // Mengambil data category untuk ditampilkan di spinner
                 mDetailMakananByUserPresenter.getCategory();
@@ -105,6 +111,23 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
         //And finally ask for the permission
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.STORAGE_PERMISSION_CODE);
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            //If permission is granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Displaying a toast
+                showMessage("Permission granted now you can read the storage");
+                Log.i("Permission on", "onRequestPermissionsResult: " + String.valueOf(grantResults));
+            } else {
+                //Displaying another toast if permission is not granted
+                showMessage("Oops you just denied the permission");
+                Log.i("Permission off", "onRequestPermissionsResult: " + String.valueOf(grantResults));
+            }
+        }
     }
 
     @Override
@@ -131,8 +154,19 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
         // Menampilkan semua data ke layar
         edtName.setText(makananData.getNamaMakanan());
         edtDesc.setText(makananData.getDescMakanan());
+
         // Memilih spinner sesuai dengan category makanan yang ada di dalam database
-        spinCategory.setSelection(Integer.valueOf(idCategory));
+        for (int i = 0 ;i < mIdCategory.length; i++){
+
+            Log.i("cek", "isi loop select mIdCategory: " + mIdCategory[i]);
+
+            if (Integer.valueOf(mIdCategory[i]).equals(Integer.valueOf(idCategory))){
+                spinCategory.setSelection(i);
+                Log.i("cek", "isi select mIdCategory: " + mIdCategory[i]);
+                Log.i("cek", "isi select idCategory: " + idCategory);
+            }
+        }
+
 
         // Menampilkan gambar makanan
         RequestOptions options = new RequestOptions().error(R.drawable.ic_broken_image).placeholder(R.drawable.ic_broken_image);
@@ -150,20 +184,34 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
     }
 
     @Override
+    public void successUpdate() {
+        mDetailMakananByUserPresenter.getCategory();
+    }
+
+    @Override
     public void showSpinnerCategory(List<MakananData> categoryDataList) {
         // Membuat data penampung untuk spinner
-        List<String> listSpinner = new ArrayList<>();
-        listSpinner.clear();
-        for (int i = 0; i < categoryDataList.size(); i++){
-            listSpinner.add(categoryDataList.get(i).getNamaKategori());
+//        List<String> listSpinner = new ArrayList<>();
+
+        String [] namaCategory = new String[categoryDataList.size()];
+        mIdCategory = new String[categoryDataList.size()];
+
+        for (int i = 0; i < categoryDataList.size(); i++) {
+//            listSpinner.add(categoryDataList.get(i).getNamaKategori());
+            namaCategory[i] = categoryDataList.get(i).getNamaKategori();
+            mIdCategory[i] = categoryDataList.get(i).getIdKategori();
+
+            Log.i("cek", "isi show namaCategory: " + namaCategory[i]);
+            Log.i("cek", "isi show mIdCategory: " + mIdCategory[i]);
         }
 
         // Membuat adapter spinner
-        ArrayAdapter<String> categorySpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, listSpinner);
+        ArrayAdapter<String> categorySpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, namaCategory);
         // Kita setting untuk menampilkan spinner dengan 1 line
         categorySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         // Memasukkan adapter ke spinner
         spinCategory.setAdapter(categorySpinnerAdapter);
+
 
         spinCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -178,7 +226,6 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
             }
         });
 
-
         // Mengambil data detail makanan
         mDetailMakananByUserPresenter.getDetailMakanan(idMakanan);
 
@@ -188,8 +235,20 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.fab_choose_picture:
+                PermissionGalery();
+                // Mengambil gambar dari storage
+                ShowFileChooser();
                 break;
             case R.id.btn_update:
+                mDetailMakananByUserPresenter.updateDataMakanan(
+                        this,
+                        filePath,
+                        edtName.getText().toString(),
+                        edtDesc.getText().toString(),
+                        idCategory,
+                        namaFotoMakanan,
+                        idMakanan
+                );
                 break;
             case R.id.btn_delete:
                 mDetailMakananByUserPresenter.deleteMakanan(idMakanan, namaFotoMakanan);
@@ -197,15 +256,42 @@ public class DetailMakananByUserActivity extends AppCompatActivity implements De
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Mengambil data category untuk ditampilkan di spinner
-        mDetailMakananByUserPresenter.getCategory();
-        // Mengambil data detail makanan
-        mDetailMakananByUserPresenter.getDetailMakanan(idMakanan);
-
-
+    private void ShowFileChooser() {
+        // Membuat object intent untuk dapat memilih data
+        Intent intentGallery = new Intent(Intent.ACTION_PICK);
+        intentGallery.setType("image/*");
+        intentGallery.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intentGallery, "Select Pictures"),
+                1);
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 &&
+                resultCode == RESULT_OK &&
+                data != null &&
+                data.getData() != null
+        ) {
+            // mengambil data foto dan memasukkan ke dalam variable filePath
+            filePath = data.getData();
+
+            try {
+                // Mengambil data gambar lalu di convert ke bitmap
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                // Tampilkan gambar yang baru dipilih ke layar
+                imgPicture.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        // Mengambil data category untuk ditampilkan di spinner
+//        mDetailMakananByUserPresenter.getCategory();
+//    }
 }

@@ -4,6 +4,7 @@ package me.firdaus1453.crudmakanan.utils;
  * Created by firdaus1453 on 2/28/2019.
  */
 public class Constants {
+    // Baseurl untuk alamat api
     public static final String BASE_URL = "http://192.168.56.1/makanan/";
     public static final String KEY_LOGIN = "KEY_LOGIN";
     public static final int STORAGE_PERMISSION_CODE = 1;
